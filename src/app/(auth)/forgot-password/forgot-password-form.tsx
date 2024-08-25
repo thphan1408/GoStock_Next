@@ -13,13 +13,16 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { LoginBody, LoginBodyType } from '@/schema-validations/auth.schema'
+import {
+  ForgotPasswordBody,
+  ForgotPasswordBodyType,
+} from '@/schema-validations/auth.schema'
 import envConfig from '@/config'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/components/ui/use-toast'
 
 interface FieldError {
-  field: 'email' | 'password' // Nếu bạn biết chắc các trường lỗi sẽ là 'email' hoặc 'password'
+  field: 'email' // Nếu bạn biết chắc các trường lỗi sẽ là 'email'
   message: string
 }
 
@@ -28,32 +31,23 @@ interface ErrorPayload {
   fields: FieldError[]
 }
 
-const LoginForm = () => {
+const ForgotPasswordForm = () => {
   const { toast } = useToast()
   const router = useRouter()
 
-  const date = new Date()
-  const formattedDate = date.toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
-
   // 1. Define your form.
-  const form = useForm<LoginBodyType>({
-    resolver: zodResolver(LoginBody),
+  const form = useForm<ForgotPasswordBodyType>({
+    resolver: zodResolver(ForgotPasswordBody),
     defaultValues: {
       email: '',
-      password: '',
     },
   })
 
   // 2. Define a submit handler.
-  async function onSubmit(values: LoginBodyType) {
+  async function onSubmit(values: ForgotPasswordBodyType) {
     try {
       const result = await fetch(
-        `${envConfig.NEXT_PUBLIC_API_ENDPOINT}/login`,
+        `${envConfig.NEXT_PUBLIC_API_ENDPOINT}/forgot-password`,
         {
           method: 'POST',
           headers: {
@@ -66,50 +60,32 @@ const LoginForm = () => {
 
         const data = {
           status: res.status,
-          token: payload.accessToken,
           payload,
         }
 
         if (!res.ok) {
           throw data
         }
-
-        // // save token to local storage
-        localStorage.setItem('token', data.token)
-
         return data
       })
 
-      // redirect to home page
-      router.push('/')
+      router.push('/reset-password')
 
-      // show toast
-      toast({
-        title: 'Login success',
-        description: `You have successfully logged in on ${formattedDate}`,
-      })
       console.log(result)
     } catch (error: any) {
       const errors = error.payload.errors as ErrorPayload
       const status = error.status as number
 
-      if (status === 401) {
+      if (status === 404) {
         errors.fields.forEach((error) => {
-          form.setError(error.field as 'email' | 'password', {
-            type: 'server',
-            message: error.message,
-          })
-        })
-      } else if (status === 404) {
-        errors.fields.forEach((error) => {
-          form.setError(error.field as 'email' | 'password', {
+          form.setError(error.field as 'email', {
             type: 'server',
             message: error.message,
           })
         })
       } else {
         toast({
-          title: 'Login failed',
+          title: 'failed',
           description: error.errors.message,
         })
       }
@@ -137,22 +113,9 @@ const LoginForm = () => {
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Password</FormLabel>
-                <FormControl>
-                  <Input placeholder="Password..." {...field} type="password" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
 
           <Button type="submit" className="!mt-8 w-full bg-[#6941C6]">
-            Login
+            Send email request
           </Button>
         </form>
       </Form>
@@ -160,4 +123,4 @@ const LoginForm = () => {
   )
 }
 
-export default LoginForm
+export default ForgotPasswordForm

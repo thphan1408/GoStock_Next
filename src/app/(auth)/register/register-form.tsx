@@ -134,7 +134,7 @@ const RegisterForm = () => {
             </FormItem>
           )}
         />
-        <Button type="submit" className="!mt-8 w-full">
+        <Button type="submit" className="!mt-8 w-full bg-[#6941C6]">
           Sign up
         </Button>
       </form>

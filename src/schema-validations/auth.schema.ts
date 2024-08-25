@@ -1,5 +1,43 @@
 import z from 'zod'
 
+// Forgot Password Schema
+export const ForgotPasswordBody = z
+  .object({
+    email: z.string().email({ message: 'Email không hợp lệ' }),
+  })
+  .strict()
+
+export type ForgotPasswordBodyType = z.TypeOf<typeof ForgotPasswordBody>
+
+export const ForgotPasswordRes = z.object({
+  message: z.string(),
+})
+
+// Reset Password Schema
+export const ResetPasswordBody = z
+  .object({
+    newPassword: z
+      .string()
+      .min(6, { message: 'Mật khẩu phải có ít nhất 6 ký tự' })
+      .max(100),
+    confirmPassword: z.string().min(6).max(100),
+  })
+  .strict()
+  .superRefine(({ confirmPassword, newPassword }, ctx) => {
+    if (confirmPassword !== newPassword) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Mật khẩu không khớp',
+        path: ['confirmPassword'],
+      })
+    }
+  })
+
+export type ResetPasswordBodyType = z.TypeOf<typeof ResetPasswordBody>
+
+export const ResetPasswordRes = z.object({
+  message: z.string(),
+})
 export const RegisterBody = z
   .object({
     yourName: z.string().trim().min(2).max(256),

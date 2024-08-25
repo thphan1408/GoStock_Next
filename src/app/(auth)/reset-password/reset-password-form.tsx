@@ -2,7 +2,6 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -13,13 +12,16 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { LoginBody, LoginBodyType } from '@/schema-validations/auth.schema'
+import {
+  ResetPasswordBody,
+  ResetPasswordBodyType,
+} from '@/schema-validations/auth.schema'
 import envConfig from '@/config'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/components/ui/use-toast'
 
 interface FieldError {
-  field: 'email' | 'password' // Nếu bạn biết chắc các trường lỗi sẽ là 'email' hoặc 'password'
+  field: 'newPassword' | 'confirmPassword' // Nếu bạn biết chắc các trường lỗi sẽ là 'newPassword' hoặc 'confirmPassword'
   message: string
 }
 
@@ -28,32 +30,22 @@ interface ErrorPayload {
   fields: FieldError[]
 }
 
-const LoginForm = () => {
+const ResetPasswordForm = () => {
   const { toast } = useToast()
   const router = useRouter()
 
-  const date = new Date()
-  const formattedDate = date.toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
-
-  // 1. Define your form.
-  const form = useForm<LoginBodyType>({
-    resolver: zodResolver(LoginBody),
+  const form = useForm<ResetPasswordBodyType>({
+    resolver: zodResolver(ResetPasswordBody),
     defaultValues: {
-      email: '',
-      password: '',
+      newPassword: '',
+      confirmPassword: '',
     },
   })
 
-  // 2. Define a submit handler.
-  async function onSubmit(values: LoginBodyType) {
+  async function onSubmit(values: ResetPasswordBodyType) {
     try {
       const result = await fetch(
-        `${envConfig.NEXT_PUBLIC_API_ENDPOINT}/login`,
+        `${envConfig.NEXT_PUBLIC_API_ENDPOINT}/reset-password`,
         {
           method: 'POST',
           headers: {
@@ -61,56 +53,51 @@ const LoginForm = () => {
           },
           body: JSON.stringify(values),
         },
-      ).then(async (res) => {
-        const payload = await res.json()
+      )
+      //   .then(async (res) => {
+      //     const payload = await res.json()
+      //     console.log('payload:', payload)
 
-        const data = {
-          status: res.status,
-          token: payload.accessToken,
-          payload,
-        }
+      // const data = {
+      //   status: res.status,
+      //   payload,
+      // }
 
-        if (!res.ok) {
-          throw data
-        }
+      // if (!res.ok) {
+      //   throw data
+      // }
 
-        // // save token to local storage
-        localStorage.setItem('token', data.token)
+      // // Xóa token cũ từ localStorage
+      // localStorage.removeItem('token')
 
-        return data
-      })
+      // return data
+      //   })
 
-      // redirect to home page
-      router.push('/')
+      // Redirect đến trang đăng nhập hoặc trang chính
+      //   router.push('/login')
 
-      // show toast
-      toast({
-        title: 'Login success',
-        description: `You have successfully logged in on ${formattedDate}`,
-      })
+      // Hiển thị thông báo thành công
+      //   toast({
+      //     title: 'Password reset successful',
+      //     description: 'Please log in with your new password.',
+      //   })
+
       console.log(result)
     } catch (error: any) {
       const errors = error.payload.errors as ErrorPayload
       const status = error.status as number
-
-      if (status === 401) {
+      if (status === 400) {
         errors.fields.forEach((error) => {
-          form.setError(error.field as 'email' | 'password', {
-            type: 'server',
-            message: error.message,
-          })
-        })
-      } else if (status === 404) {
-        errors.fields.forEach((error) => {
-          form.setError(error.field as 'email' | 'password', {
+          form.setError(error.field as 'newPassword' | 'confirmPassword', {
             type: 'server',
             message: error.message,
           })
         })
       } else {
         toast({
-          title: 'Login failed',
-          description: error.errors.message,
+          title: 'Reset failed',
+          description:
+            error.message || 'An error occurred during password reset.',
         })
       }
     }
@@ -126,12 +113,16 @@ const LoginForm = () => {
         >
           <FormField
             control={form.control}
-            name="email"
+            name="newPassword"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>New Password</FormLabel>
                 <FormControl>
-                  <Input placeholder="email..." {...field} type="email" />
+                  <Input
+                    placeholder="New Password..."
+                    {...field}
+                    type="password"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -139,12 +130,16 @@ const LoginForm = () => {
           />
           <FormField
             control={form.control}
-            name="password"
+            name="confirmPassword"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Password</FormLabel>
+                <FormLabel>Confirm Password</FormLabel>
                 <FormControl>
-                  <Input placeholder="Password..." {...field} type="password" />
+                  <Input
+                    placeholder="Confirm Password..."
+                    {...field}
+                    type="password"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -152,7 +147,7 @@ const LoginForm = () => {
           />
 
           <Button type="submit" className="!mt-8 w-full bg-[#6941C6]">
-            Login
+            Reset Password
           </Button>
         </form>
       </Form>
@@ -160,4 +155,4 @@ const LoginForm = () => {
   )
 }
 
-export default LoginForm
+export default ResetPasswordForm

@@ -4,7 +4,6 @@ const router = jsonServer.router('db.json')
 const middlewares = jsonServer.defaults()
 const fs = require('fs')
 const path = require('path')
-const { error } = require('console')
 
 const port = process.env.NEXT_PUBLIC_PORT || 3001
 
@@ -47,6 +46,8 @@ server.post('/register', (req, res) => {
     email,
     password,
     confirmPassword,
+    accessToken: Math.random().toString(36).substring(2),
+    refreshToken: Math.random().toString(36).substring(2),
   }
 
   users.push(newUser)
@@ -61,20 +62,18 @@ server.post('/register', (req, res) => {
 server.post('/login', (req, res, next) => {
   const { email, password } = req.body
 
-  // Read the db file and parse it to JSON from db.json
   const dbFilePath = path.join(__dirname, 'db.json')
   const dbData = JSON.parse(fs.readFileSync(dbFilePath, 'utf-8'))
 
   const user = dbData.users.find((user) => user.email === email)
 
-  // Check if email exists
   if (!user) {
     return next({
       statusCode: 404,
       fields: [{ field: 'email', message: 'Email không tồn tại' }],
     })
   }
-  // Check if password is correct
+
   if (password !== user.password) {
     return next({
       statusCode: 401,
@@ -84,24 +83,18 @@ server.post('/login', (req, res, next) => {
     })
   }
 
-  if (!user) {
-    return res.status(401).json({ error: 'Đăng nhập không thành công' })
-  }
-
   res.status(200).json(user)
 })
 
-// route to reset password
-server.patch('/reset-password', (req, res, next) => {
-  const { email, password, confirmPassword } = req.body
+// Route to forgot password
+server.post('/forgot-password', (req, res, next) => {
+  const { email } = req.body
 
-  // Read the db file and parse it to JSON from db.json
   const dbFilePath = path.join(__dirname, 'db.json')
   const dbData = JSON.parse(fs.readFileSync(dbFilePath, 'utf-8'))
 
   const user = dbData.users.find((user) => user.email === email)
 
-  // Check if email exists
   if (!user) {
     return next({
       statusCode: 404,
@@ -109,34 +102,45 @@ server.patch('/reset-password', (req, res, next) => {
     })
   }
 
-  if (password.length < 6 || confirmPassword.length < 6) {
-    return next({
-      statusCode: 400,
-      fields: [
-        { field: 'password', message: 'Mật khẩu phải có ít nhất 6 kí tự' },
-      ],
-    })
-  }
+  const token = Math.random().toString(36).substring(2)
+  user.resetToken = token
 
-  // Check if password is correct
-  if (password !== confirmPassword) {
-    return next({
-      statusCode: 401,
-      fields: [{ field: 'password', message: 'Mật khẩu không khớp' }],
-    })
-  }
-
-  // Update the password vs the confirmPassword
-  user.password = password
-  user.confirmPassword = confirmPassword
-
-  // Write the updated data back to the db.json file
   fs.writeFileSync(dbFilePath, JSON.stringify(dbData, null, 2))
 
-  res.status(200).json(user)
+  res.status(200).json({ message: 'Token sent to email', token })
 })
 
-// Middleware xử lý lỗi
+// Route to reset password
+server.post('/reset-password', (req, res, next) => {
+  const { newPassword, confirmPassword } = req.body
+  console.log('confirmPassword:', confirmPassword)
+  console.log('newPassword:', newPassword)
+
+  if (newPassword !== confirmPassword) {
+    return res.status(400).json({ error: 'Passwords do not match' })
+  }
+
+  const dbFilePath = path.join(__dirname, 'db.json')
+  const dbData = JSON.parse(fs.readFileSync(dbFilePath, 'utf-8'))
+
+  const user = dbData.users.find((user) => user.resetToken === token)
+
+  if (!user) {
+    return next({
+      statusCode: 404,
+      fields: [{ field: 'token', message: 'Token không hợp lệ' }],
+    })
+  }
+
+  user.password = newPassword
+  delete user.resetToken
+
+  fs.writeFileSync(dbFilePath, JSON.stringify(dbData, null, 2))
+
+  res.status(200).json({ message: 'Password reset successful' })
+})
+
+// Middleware to handle errors
 server.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500
   const errorResponse = {
