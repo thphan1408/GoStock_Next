@@ -1,0 +1,50 @@
+import { DataTable } from '@/components/data-table'
+import { ColumnDef } from '@tanstack/react-table'
+import React from 'react'
+import PageTitle from '@/components/page-title'
+import { cn } from '@/lib/utils'
+
+type Props = {}
+
+interface Setting {
+  category: string
+  value: string | number | boolean
+}
+
+const columns: ColumnDef<Setting>[] = [
+  {
+    accessorKey: 'category',
+    header: 'Category',
+  },
+  {
+    accessorKey: 'value',
+    header: 'Value',
+  },
+]
+const data: Setting[] = [
+  {
+    category: 'Account',
+    value: true,
+  },
+  {
+    category: 'Notifications',
+    value: false,
+  },
+  {
+    category: 'Language',
+    value: 'English',
+  },
+  {
+    category: 'Theme',
+    value: 'Dark',
+  },
+] as Setting[]
+
+export default function SettingsPage({}: Props) {
+  return (
+    <div className="flex flex-col gap-5  w-full">
+      <PageTitle title="Settings" />
+      <DataTable columns={columns} data={data} />
+    </div>
+  )
+}
