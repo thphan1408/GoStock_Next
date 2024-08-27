@@ -3,8 +3,8 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/components/theme-provider'
 import Header from '@/components/header'
-import Footer from '@/components/footer'
 import { Toaster } from '@/components/ui/toaster'
+import FooterSection from '@/components/footer'
 
 const inter = Inter({
   subsets: ['vietnamese'],
@@ -31,7 +31,7 @@ export default function RootLayout({
         >
           <Header />
           <main>{children}</main>
-          <Footer />
+          <FooterSection />
         </ThemeProvider>
         <Toaster />
       </body>

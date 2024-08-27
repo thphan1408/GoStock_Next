@@ -20,6 +20,7 @@ import {
 import envConfig from '@/config'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/components/ui/use-toast'
+import { useEffect } from 'react'
 const RegisterForm = () => {
   const { toast } = useToast()
   const router = useRouter()
@@ -31,6 +32,8 @@ const RegisterForm = () => {
     month: 'long',
     day: 'numeric',
   })
+
+  const users = JSON.parse(localStorage.getItem('user') || '{}')
 
   // 1. Define your form.
   const form = useForm<RegisterBodyType>({
@@ -45,30 +48,42 @@ const RegisterForm = () => {
 
   // 2. Define a submit handler.
   async function onSubmit(values: RegisterBodyType) {
-    await fetch(`${envConfig.NEXT_PUBLIC_API_ENDPOINT}/register`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(values),
-    }).then(async (res) => await res.json())
+    // set email password to local storage
+    // check if email already exists
+    if (values.email === users.email) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Email already exists',
+      })
 
-    // form reset value
-    form.reset({
-      yourName: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
-    })
+      form.reset()
+    }
 
-    // redirect to login page
-    router.push('/login')
+    // check if password and confirm password match
+    if (values.password !== values.confirmPassword) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Passwords do not match',
+      })
+    }
 
-    // handle success
-    toast({
-      title: 'Register success!',
-      description: formattedDate,
-    })
+    if (
+      values.email !== users.email &&
+      values.password === values.confirmPassword
+    ) {
+      toast({
+        variant: 'default',
+        title: 'Success',
+        description: 'Account created successfully',
+      })
+
+      // store user data in local storage
+      localStorage.setItem('user', JSON.stringify(values))
+      // // redirect to login page
+      router.push('/login')
+    }
   }
 
   return (

@@ -1,10 +1,9 @@
-import Image from 'next/image'
 import { DollarSign, Users, CreditCard, Activity } from 'lucide-react'
 
 import SalesCard, { SalesProps } from '@/components/sale-card'
 import PageTitle from '@/components/page-title'
-import BarChart from '@/components/bar-chart'
 import Card, { CardContent, CardProps } from '@/components/card'
+import BarChartComp from '@/components/bar-chart'
 
 const cardData: CardProps[] = [
   {
@@ -63,7 +62,7 @@ const uesrSalesData: SalesProps[] = [
 
 export default function DashboardPage() {
   return (
-    <div className="flex flex-col gap-5  w-full">
+    <div className="flex flex-col gap-5 w-full">
       <PageTitle title="Dashboard" />
       <section className="grid w-full grid-cols-1 gap-4 gap-x-8 transition-all sm:grid-cols-2 xl:grid-cols-4">
         {cardData.map((d, i) => (
@@ -80,7 +79,7 @@ export default function DashboardPage() {
         <CardContent>
           <p className="p-4 font-semibold">Overview</p>
 
-          <BarChart />
+          <BarChartComp />
         </CardContent>
         <CardContent className="flex justify-between gap-4">
           <section>
@@ -101,6 +100,18 @@ export default function DashboardPage() {
 
         {/*  */}
       </section>
+
+      {/* <section className="grid w-full grid-cols-1 gap-4 gap-x-8 transition-all sm:grid-cols-2 xl:grid-cols-4">
+        {cardData.map((d, i) => (
+          <Card
+            key={i}
+            amount={d.amount}
+            discription={d.discription}
+            icon={d.icon}
+            label={d.label}
+          />
+        ))}
+      </section> */}
     </div>
   )
 }

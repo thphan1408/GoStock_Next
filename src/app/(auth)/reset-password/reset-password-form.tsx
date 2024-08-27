@@ -42,64 +42,35 @@ const ResetPasswordForm = () => {
     },
   })
 
+  const storeUser = JSON.parse(localStorage.getItem('user') || '{}')
+
   async function onSubmit(values: ResetPasswordBodyType) {
-    try {
-      const result = await fetch(
-        `${envConfig.NEXT_PUBLIC_API_ENDPOINT}/reset-password`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(values),
-        },
+    if (values.newPassword !== values.confirmPassword) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Password does not match',
+      })
+    }
+
+    if (values.newPassword === values.confirmPassword) {
+      // set new password and confirmPassword to local storage with object key 'user' and {
+      //  email: 'email',
+      //  password: 'password',
+      //  name: 'name',
+      //  confirmPassword: 'confirmPassword' }
+
+      localStorage.setItem(
+        'user',
+        JSON.stringify({
+          yourName: storeUser.yourName,
+          email: storeUser.email,
+          password: values.newPassword,
+          confirmPassword: values.confirmPassword,
+        }),
       )
-      //   .then(async (res) => {
-      //     const payload = await res.json()
-      //     console.log('payload:', payload)
 
-      // const data = {
-      //   status: res.status,
-      //   payload,
-      // }
-
-      // if (!res.ok) {
-      //   throw data
-      // }
-
-      // // Xóa token cũ từ localStorage
-      // localStorage.removeItem('token')
-
-      // return data
-      //   })
-
-      // Redirect đến trang đăng nhập hoặc trang chính
-      //   router.push('/login')
-
-      // Hiển thị thông báo thành công
-      //   toast({
-      //     title: 'Password reset successful',
-      //     description: 'Please log in with your new password.',
-      //   })
-
-      console.log(result)
-    } catch (error: any) {
-      const errors = error.payload.errors as ErrorPayload
-      const status = error.status as number
-      if (status === 400) {
-        errors.fields.forEach((error) => {
-          form.setError(error.field as 'newPassword' | 'confirmPassword', {
-            type: 'server',
-            message: error.message,
-          })
-        })
-      } else {
-        toast({
-          title: 'Reset failed',
-          description:
-            error.message || 'An error occurred during password reset.',
-        })
-      }
+      router.push('/login')
     }
   }
 

@@ -20,6 +20,7 @@ import {
 import envConfig from '@/config'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/components/ui/use-toast'
+import { ChevronRight } from 'lucide-react'
 
 interface FieldError {
   field: 'email' // Nếu bạn biết chắc các trường lỗi sẽ là 'email'
@@ -43,52 +44,19 @@ const ForgotPasswordForm = () => {
     },
   })
 
+  const storeUser = JSON.parse(localStorage.getItem('user') || '{}')
+
   // 2. Define a submit handler.
   async function onSubmit(values: ForgotPasswordBodyType) {
-    try {
-      const result = await fetch(
-        `${envConfig.NEXT_PUBLIC_API_ENDPOINT}/forgot-password`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(values),
-        },
-      ).then(async (res) => {
-        const payload = await res.json()
-
-        const data = {
-          status: res.status,
-          payload,
-        }
-
-        if (!res.ok) {
-          throw data
-        }
-        return data
+    // check if email not match with local storage
+    if (storeUser.email !== values.email) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Email does not match',
       })
-
+    } else {
       router.push('/reset-password')
-
-      console.log(result)
-    } catch (error: any) {
-      const errors = error.payload.errors as ErrorPayload
-      const status = error.status as number
-
-      if (status === 404) {
-        errors.fields.forEach((error) => {
-          form.setError(error.field as 'email', {
-            type: 'server',
-            message: error.message,
-          })
-        })
-      } else {
-        toast({
-          title: 'failed',
-          description: error.errors.message,
-        })
-      }
     }
   }
 
@@ -116,6 +84,7 @@ const ForgotPasswordForm = () => {
 
           <Button type="submit" className="!mt-8 w-full bg-[#6941C6]">
             Send email request
+            <ChevronRight />
           </Button>
         </form>
       </Form>

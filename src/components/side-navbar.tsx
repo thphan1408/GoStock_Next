@@ -5,21 +5,28 @@ import {
   Home,
   LayoutDashboard,
   Newspaper,
+  Settings,
+  ShoppingCart,
   User,
   Wallet,
 } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { Nav } from '@/components/ui/nav'
-import { useWindowWidth } from '@react-hook/window-size'
 import { Button } from '@/components/ui/button'
+import { useViewPortWidth } from '@/hooks/useViewPortWidth'
+import { set } from 'zod'
 
 interface ISideNavBarProps {}
 
 const SideNavbar = ({}: ISideNavBarProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const [mobileWidth, setMobileWidth] = useState(false)
 
-  // const onlyWidth = useWindowWidth()
-  // const mobileWidth = onlyWidth < 768
+  const width = useViewPortWidth()
+
+  useEffect(() => {
+    setMobileWidth(width < 768)
+  }, [width])
 
   const toggleCollapse = () => {
     setIsCollapsed(!isCollapsed)
@@ -27,22 +34,23 @@ const SideNavbar = ({}: ISideNavBarProps) => {
 
   return (
     <div className="relative min-w-fit border-r px-3 pb-10 pt-24">
-      {/* {!mobileWidth && ( */}
-      <div className="absolute right-[-20px] top-7">
-        <Button
-          variant={'secondary'}
-          className="rounded-full p-2"
-          size="icon"
-          onClick={toggleCollapse}
-        >
-          <ChevronRight />
-        </Button>
-      </div>
-      {/* )} */}
+      {!mobileWidth && (
+        <div className="absolute right-[-20px] top-7">
+          <Button
+            variant={'secondary'}
+            className="rounded-full p-2"
+            size="icon"
+            onClick={toggleCollapse}
+          >
+            <ChevronRight />
+          </Button>
+        </div>
+      )}
+
       <Nav
         className="space-y-3"
-        isCollapsed={isCollapsed}
-        // isCollapsed={mobileWidth ? true : isCollapsed}
+        // isCollapsed={isCollapsed}
+        isCollapsed={mobileWidth ? true : isCollapsed}
         links={[
           {
             title: 'Home',
@@ -65,34 +73,21 @@ const SideNavbar = ({}: ISideNavBarProps) => {
             variant: 'ghost',
             href: '/dashboard/users',
           },
+
           {
-            title: 'Wallet',
+            title: 'Orders',
             label: '',
-            icon: Wallet,
+            icon: ShoppingCart,
             variant: 'ghost',
-            href: '/dashboard/wallet',
+            href: '/dashboard/orders',
           },
           {
-            title: 'News',
+            title: 'Settings',
             label: '',
-            icon: Newspaper,
+            icon: Settings,
             variant: 'ghost',
-            href: '/dashboard/news',
+            href: '/dashboard/setting',
           },
-          // {
-          //   title: 'Settings',
-          //   label: '',
-          //   icon: Settings,
-          //   variant: 'ghost',
-          //   href: '/dashboard/settings',
-          // },
-          // {
-          //   title: 'Stock and funds',
-          //   label: '',
-          //   icon: Layers,
-          //   variant: 'ghost',
-          //   //
-          // },
         ]}
       />
     </div>
