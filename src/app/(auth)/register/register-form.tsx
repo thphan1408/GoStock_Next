@@ -33,7 +33,9 @@ const RegisterForm = () => {
     day: 'numeric',
   })
 
-  const users = JSON.parse(localStorage.getItem('user') || '{}')
+  if (typeof window !== 'undefined') {
+    var storeUser = JSON.parse(localStorage.getItem('user') || '{}')
+  }
 
   // 1. Define your form.
   const form = useForm<RegisterBodyType>({
@@ -48,42 +50,14 @@ const RegisterForm = () => {
 
   // 2. Define a submit handler.
   async function onSubmit(values: RegisterBodyType) {
-    // set email password to local storage
-    // check if email already exists
-    if (values.email === users.email) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Email already exists',
-      })
-
-      form.reset()
+    var user = {
+      yourName: values.yourName,
+      email: values.email,
+      password: values.password,
+      confirmPassword: values.confirmPassword,
     }
-
-    // check if password and confirm password match
-    if (values.password !== values.confirmPassword) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Passwords do not match',
-      })
-    }
-
-    if (
-      values.email !== users.email &&
-      values.password === values.confirmPassword
-    ) {
-      toast({
-        variant: 'default',
-        title: 'Success',
-        description: 'Account created successfully',
-      })
-
-      // store user data in local storage
-      localStorage.setItem('user', JSON.stringify(values))
-      // // redirect to login page
-      router.push('/login')
-    }
+    localStorage.setItem('user', JSON.stringify(user))
+    router.push('/login')
   }
 
   return (
