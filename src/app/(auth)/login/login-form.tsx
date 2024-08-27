@@ -24,9 +24,13 @@ const LoginForm = () => {
   const [checkEmail, setCheckEmail] = useState(true)
   const [checkPassword, setCheckPass] = useState(true)
 
-  // useEffect(() => {
-  //
-  // }, [])
+  useEffect(() => {
+    var username = localStorage.getItem('user')
+    console.log('username', username)
+    if (!username) {
+      localStorage.setItem('user', JSON.stringify({ email: '', password: '' }))
+    }
+  }, [])
 
   const form = useForm<LoginBodyType>({
     resolver: zodResolver(LoginBody),
@@ -36,37 +40,24 @@ const LoginForm = () => {
     },
   })
 
-  // localStorage.setItem(
-  //   'user',
-  //   JSON.stringify({
-  //     yourName: '',
-  //     email: '',
-  //     password: '',
-  //     confirmPassword: '',
-  //   }),
-  // )
-
   const storedUser = JSON.parse(localStorage.getItem('user') || '{}')
 
   async function onSubmit(values: LoginBodyType) {
+    const user: any = localStorage.getItem('user')
+    const storedUser = JSON.parse(user)
+
+    console.log('storedUser.password == values.password', storedUser.password)
+    console.log('storedUser.password == values.password', values.password)
+
     if (
       storedUser.email === values.email &&
-      storedUser.password === values.password
+      storedUser.password == values.password
     ) {
-      setCheckEmail(true)
-      setCheckPass(true)
       router.push('/')
-    }
-    if (storedUser.email !== values.email) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Email does not exist',
-      })
-      // setCheckEmail(false)
-    }
-    if (storedUser.password !== values.password) {
-      setCheckPass(false)
+    } else if (storedUser.email !== values.email) {
+      setCheckEmail(true)
+    } else if (storedUser.password !== values.password) {
+      setCheckPass(true)
     }
   }
 

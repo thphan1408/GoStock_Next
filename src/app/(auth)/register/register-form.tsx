@@ -48,42 +48,9 @@ const RegisterForm = () => {
 
   // 2. Define a submit handler.
   async function onSubmit(values: RegisterBodyType) {
-    // set email password to local storage
-    // check if email already exists
-    if (values.email === users.email) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Email already exists',
-      })
-
-      form.reset()
-    }
-
-    // check if password and confirm password match
-    if (values.password !== values.confirmPassword) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Passwords do not match',
-      })
-    }
-
-    if (
-      values.email !== users.email &&
-      values.password === values.confirmPassword
-    ) {
-      toast({
-        variant: 'default',
-        title: 'Success',
-        description: 'Account created successfully',
-      })
-
-      // store user data in local storage
-      localStorage.setItem('user', JSON.stringify(values))
-      // // redirect to login page
-      router.push('/login')
-    }
+    var user = { email: values.email, password: values.password }
+    localStorage.setItem('user', JSON.stringify(user))
+    router.push('/login')
   }
 
   return (
