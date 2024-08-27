@@ -44,7 +44,9 @@ const ForgotPasswordForm = () => {
     },
   })
 
-  const storeUser = JSON.parse(localStorage.getItem('user') || '{}')
+  if (typeof window !== 'undefined') {
+    var storeUser = JSON.parse(localStorage.getItem('user') || '{}')
+  }
 
   // 2. Define a submit handler.
   async function onSubmit(values: ForgotPasswordBodyType) {

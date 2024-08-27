@@ -33,7 +33,9 @@ const RegisterForm = () => {
     day: 'numeric',
   })
 
-  const users = JSON.parse(localStorage.getItem('user') || '{}')
+  if (typeof window !== 'undefined') {
+    var storeUser = JSON.parse(localStorage.getItem('user') || '{}')
+  }
 
   // 1. Define your form.
   const form = useForm<RegisterBodyType>({
@@ -48,7 +50,12 @@ const RegisterForm = () => {
 
   // 2. Define a submit handler.
   async function onSubmit(values: RegisterBodyType) {
-    var user = { email: values.email, password: values.password }
+    var user = {
+      yourName: values.yourName,
+      email: values.email,
+      password: values.password,
+      confirmPassword: values.confirmPassword,
+    }
     localStorage.setItem('user', JSON.stringify(user))
     router.push('/login')
   }

@@ -40,7 +40,9 @@ const LoginForm = () => {
     },
   })
 
-  const storedUser = JSON.parse(localStorage.getItem('user') || '{}')
+  if (typeof window !== 'undefined') {
+    var storeUser = JSON.parse(localStorage.getItem('user') || '{}')
+  }
 
   async function onSubmit(values: LoginBodyType) {
     const user: any = localStorage.getItem('user')
