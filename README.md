@@ -19,6 +19,7 @@
 
     ### Nhược điểm:
     - Chưa tối ưu về hiệu năng
+    - Chưa tùy chỉnh được widget như đề tài mong muốn
     - Giao diện dashboard trên mobile/tablet chưa được tối ưu về bố cục
     - Giao diện còn khá sơ sài
 
